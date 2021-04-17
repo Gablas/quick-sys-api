@@ -33,8 +33,10 @@ const cache = (req, res, next) => {
 
 app.get("/:query", cache, async (req, res) => {
     try {
-        console.log(req.params.query);
-        const year = req.params.query.match(/[0-9]{4}/g)[0];
+        const year = req.params.query.match(/[0-9]{4}/g);
+        if (year.length != 0) {
+            year = year[0];
+        }
         const key = req.params.query.replace(/[0-9]{4}/g, "");
         const data = await send(key);
         const filtered = data.products.filter((x) => x.vintage == year);
