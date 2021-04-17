@@ -33,7 +33,7 @@ const cache = (req, res, next) => {
 
 app.get("/:query", cache, async (req, res) => {
     try {
-        const year = req.params.query.match(/[0-9]{4}/g);
+        let year = req.params.query.match(/[0-9]{4}/g);
         if (year.length != 0) {
             year = year[0];
         }
