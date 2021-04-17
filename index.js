@@ -1,17 +1,37 @@
 const fetch = require("node-fetch");
 const fs = require("fs");
 const https = require("https");
-const http=require("http")
+const http = require("http");
 require("dotenv").config();
-const cors = require("cors")
+const cors = require("cors");
 
 const express = require("express");
 const app = express();
 const port = 80;
 
-app.use(cors())
+app.use(cors());
 
-app.get("/:query", async (req, res) => {
+const saved = {};
+
+const cache = (req, res, next) => {
+    let key = req.params.query;
+    let data = saved[key];
+    if (data) {
+        console.log("Response was saved");
+        res.send(data);
+        return;
+    } else {
+        console.log("Response not saved");
+        res.sendResponse = res.send;
+        res.send = (body) => {
+            saved[key] = body;
+            res.sendResponse(body);
+        };
+    }
+    next();
+};
+
+app.get("/:query", cache, async (req, res) => {
     try {
         const data = await send(req.params.query);
         res.send(data.products[0]);
@@ -22,17 +42,26 @@ app.get("/:query", async (req, res) => {
     }
 });
 
-const privateKey = fs.readFileSync('/etc/letsencrypt/live/342sdfsdfkk.tk/privkey.pem', 'utf8');
-const certificate = fs.readFileSync('/etc/letsencrypt/live/342sdfsdfkk.tk/cert.pem', 'utf8');
-const ca = fs.readFileSync("/etc/letsencrypt/live/342sdfsdfkk.tk/chain.pem", "utf8")
+const privateKey = fs.readFileSync(
+    "/etc/letsencrypt/live/342sdfsdfkk.tk/privkey.pem",
+    "utf8"
+);
+const certificate = fs.readFileSync(
+    "/etc/letsencrypt/live/342sdfsdfkk.tk/cert.pem",
+    "utf8"
+);
+const ca = fs.readFileSync(
+    "/etc/letsencrypt/live/342sdfsdfkk.tk/chain.pem",
+    "utf8"
+);
 
-const creds = {key:privateKey,cert:certificate, ca: ca};
+const creds = { key: privateKey, cert: certificate, ca: ca };
 
-const httpServer = http.createServer(app)
-const httpsServer = https.createServer(creds, app)
+const httpServer = http.createServer(app);
+const httpsServer = https.createServer(creds, app);
 
-httpServer.listen(80, ()=>{})
-httpsServer.listen(443, ()=>{})
+httpServer.listen(80, () => {});
+httpsServer.listen(443, () => {});
 
 function send(query) {
     return new Promise((resolve, reject) => {
