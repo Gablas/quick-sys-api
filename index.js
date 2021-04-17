@@ -18,7 +18,7 @@ const cache = (req, res, next) => {
     let data = saved[key];
     if (data) {
         console.log("Response was saved");
-        res.send(data);
+        res.send(JSON.parse(data));
         return;
     } else {
         console.log("Response not saved");
