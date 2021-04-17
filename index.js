@@ -38,7 +38,7 @@ app.get("/:query", cache, async (req, res) => {
         const data = await send(key);
         const filtered = data.products.filter((x) => x.vintage == year);
         if (filtered.length != 0) {
-            res.send(filtered);
+            res.send(filtered[0]);
         } else {
             res.send(data.products[0]);
         }
