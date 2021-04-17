@@ -33,8 +33,15 @@ const cache = (req, res, next) => {
 
 app.get("/:query", cache, async (req, res) => {
     try {
-        const data = await send(req.params.query);
-        res.send(data.products[0]);
+        const year = req.params.query.match(/[0-9]{4}/g)[0];
+        const key = req.params.query.replace(/[0-9]{4}/g, "");
+        const data = await send(key);
+        const filtered = data.products.filter((x) => x.vintage == year);
+        if (filtered.length != 0) {
+            res.send(filtered);
+        } else {
+            res.send(data.products[0]);
+        }
     } catch (e) {
         console.log("This is what went wrong");
         console.error(e);
